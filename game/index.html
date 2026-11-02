@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RWRLD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="loading-title">Загрузка мира...</div>
+            <div class="loading-progress-bar-wrapper">
+                <div id="loading-progress-bar" class="loading-progress-bar"></div>
+            </div>
+            <div id="loading-text" class="loading-text">Инициализация...</div>
+        </div>
+    </div>
+    <div id="death-screen" class="hidden">
+        <div class="death-content">
+            <div class="death-text">Вы погибли</div>
+            <button id="restart-btn" onclick="restartGame()">Создать новый мир</button>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="custom-cursor"></div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-overlay">
+
+            <button id="regen-btn" onclick="regenerateWorld()">
+                <span id="regen-progress"></span>
+                <span id="regen-text">Регенерация мира</span>
+            </button>
+            
+
+
+            <div id="time-container">
+                <div class="time-icons-wrapper">
+                    <span id="time-icon-sun" class="time-icon active">☀️</span>
+                    <span id="time-icon-moon" class="time-icon">🌙</span>
+                </div>
+                <div id="time">День 1, 08:00</div>
+            </div>
+
+            <div id="hud-right">
+                <div id="resources">
+                    <div class="res-item silver">
+                        <span class="res-icon">🪙</span>
+                        <div id="silver-count" class="counter-container"></div>
+                    </div>
+                    <div class="res-item stone">
+                        <span class="res-icon">🪨</span>
+                        <div id="stone-count" class="counter-container"></div>
+                    </div>
+                    <div class="res-item wood">
+                        <span class="res-icon">🪵</span>
+                        <div id="wood-count" class="counter-container"></div>
+                    </div>
+                    <div class="res-item gold">
+                        <span class="res-icon">✨</span>
+                        <div id="gold-count" class="counter-container"></div>
+                    </div>
+                    <div class="res-item food">
+                        <span class="res-icon">🍞</span>
+                        <div id="food-count" class="counter-container"></div>
+                    </div>
+                    <div class="res-item pickaxe">
+                        <span class="res-icon">⛏️</span>
+                        <div id="pickaxe-count" class="counter-container"></div>
+                    </div>
+                    <div class="res-item sword">
+                        <span class="res-icon">⚔️</span>
+                        <div id="sword-count" class="counter-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="hp-container">
+                <span class="hp-icon">❤️</span>
+                <div class="hp-bar-wrapper">
+                    <div id="hp-bar"></div>
+                </div>
+                <span id="hp-text">100 / 100</span>
+            </div>
+
+            <div id="action-panel">
+                <div class="action-panel-header">
+                    <span class="panel-title">Очередь задач</span>
+                </div>
+                <div id="action-list" class="action-list"></div>
+                <button id="cancel-all-btn" class="cancel-all-btn" onclick="cancelAllTasks()">Завершение всей работы</button>
+            </div>
+
+            <div id="bottom-menu">
+                <button onclick="setOrder('architect')">Стройка</button>
+                <button onclick="setOrder('unarchitect')">Сломать</button>
+                <button onclick="setOrder('chop')">Срубить</button>
+                <button onclick="setOrder('mine')">Добыть</button>
+                <button id="attack-btn" onclick="toggleAttackMode()">Атака</button>
+            </div>
+            
+
+            <div id="architect-menu" class="hidden">
+                <h3>Меню стройки</h3>
+                <div class="build-options">
+                    <button onclick="setBuildOrder('bridge')">
+                        <span class="build-icon">🌉</span>
+                        Мост
+                        <span class="build-cost">10 Дерева</span>
+                    </button>
+                    <button onclick="setBuildOrder('stone_wall')">
+                        <span class="build-icon">🧱</span>
+                        Стена
+                        <span class="build-cost">12 Камня</span>
+                    </button>
+                    <button onclick="setBuildOrder('wood_wall')">
+                        <span class="build-icon">🪵</span>
+                        Деревянная Стена
+                        <span class="build-cost">8 Дерева</span>
+                    </button>
+                    <button onclick="craftPickaxe()">
+                        <span class="build-icon">⛏️</span>
+                        Крафт кирки
+                        <span class="build-cost">48 Дерева</span>
+                    </button>
+                    <button onclick="craftSword()">
+                        <span class="build-icon">⚔️</span>
+                        Крафт меча
+                        <span class="build-cost">14 Дерева 44 Камня</span>
+                    </button>
+                </div>
+            </div>
+            <div id="inspect-panel" class="hidden">
+                <div class="inspect-header">
+                    <h3 id="inspect-title">Поселенец</h3>
+                    <button id="minimize-btn" class="minimize-btn" onclick="toggleInspectPanel()">-</button>
+                </div>
+                <div id="inspect-content"></div>
+            </div>
+            <div id="inspect-widget" class="hidden">
+                <div class="widget-avatar" id="widget-avatar">
+                    <img src="assets/avatar.jpg" alt="err">
+                </div>
+            </div>
+            <div id="debug-time-panel" class="hidden">
+                <label for="time-slider">Отладка времени:</label>
+                <input type="range" id="time-slider" min="0" max="1439" value="480">
+                <span id="slider-time-display">08:00</span>
+            </div>
+
+            <div id="cave-prompt" class="hidden"></div>
+
+            <div id="hotkey-tooltip" class="hidden"></div>
+
+            <div id="notification" class="hidden"></div>
+        </div>
+    </div>
+    <script src="js/game.js?v=3"></script>
+</body>
+</html>
